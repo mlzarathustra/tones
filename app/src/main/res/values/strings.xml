@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">Tones</string>
-    <string name="A_LABEL">A</string>
-    <string name="B_LABEL">B</string>
-    <string name="C_LABEL">C</string>
+
 
 </resources>

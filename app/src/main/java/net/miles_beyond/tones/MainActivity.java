@@ -23,8 +23,8 @@ public class MainActivity extends AppCompatActivity {
     boolean DB=false;
     boolean useFlatName=true;
 
+    // TG attributes - should not live in activity class
     double freq=440;
-
     int sampleRate = 44100;
     Thread playThread;
     boolean playing;
@@ -51,16 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             layout.addView(b);
-            /*
-            b.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Note n=noteMap.get(v);
-                    System.out.println(n);
-                    playSound();
-                }
-            });
-            */
+
             b.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
@@ -75,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
                                 break;
 
                             case MotionEvent.ACTION_UP:
+                            case MotionEvent.ACTION_CANCEL:
                                 stop();
                                 break;
                         }
@@ -115,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (DB) System.out.println("buffer size is "+bufSize);
                 gen.setBufSize(bufSize);
+                gen.reset();
                 gen.setSampleRate(sampleRate);
 
                 audTrack.play();
@@ -140,22 +133,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     synchronized void stop() {
-        audTrack.stop();
-        playing=false;
-        try { playThread.join(); }
-        catch (Exception ignore) { }
-        audTrack.stop();
-        audTrack.release();
+        if (audTrack.getState() == AudioTrack.STATE_INITIALIZED) {
+            audTrack.stop();
+            playing = false;
+            try { playThread.join(); } catch (Exception ignore) { }
+            audTrack.release();
+        }
 
     }
-/*
-    public void playSound() {
-        if (playing) stop();
-        else start();
-        //alert("playback","playing is "+playing);
-        if (DB) System.out.println(" >> playing is "+playing);
-    }
-*/
-
 
 }

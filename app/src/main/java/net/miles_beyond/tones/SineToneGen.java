@@ -20,11 +20,13 @@ public class SineToneGen {
         this.freq = freq;
     }
 
+    public void reset() { phase=0; }
+
     synchronized short[] nextBuf() {
         //System.out.print("*");
 
         for (int i = 0; i< samples.length; ++i) {
-            samples[i] = (short) (1 + amp + amp * Math.sin(phase));
+            samples[i] = (short) (amp * Math.sin(phase));
             phase += twoPI * freq / sampleRate;
         }
         //if (loops<3) { loops++; System.out.println(Arrays.toString(samples)); }
