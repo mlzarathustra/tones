@@ -16,19 +16,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import net.miles_beyond.tones.synth.ToneGen;
+
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
-    boolean DB=false;
     boolean useFlatName=true;
 
-    // TG attributes - should not live in activity class
-    double freq=440;
-    int sampleRate = 44100;
-    Thread playThread;
-    boolean playing;
-    AudioTrack audTrack;
+    ToneGen toneGen=new ToneGen();
+
+
     HashMap<Button,Note> noteMap=new HashMap<>();
 
     @Override
@@ -37,11 +35,21 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         LinearLayout layout = (LinearLayout) findViewById(R.id.keys);
+        /*
+        System.out.println("layout padding: bottom="+layout.getPaddingBottom()+
+                "; top="+layout.getPaddingTop()+"; divider: "+layout.getDividerPadding()+
+                "; showDividers is "+layout.getShowDividers()
+
+        );
+        // I guess system.out isn't available here
+        */
 
         for (Note n : Note.notes) {
             Button b = new Button(getApplication());
             b.setText(useFlatName?n.flatName:n.sharpName);
             b.setAllCaps(false);
+            //b.setMaxHeight(10);
+            //b.setPadding(0,0,0,0); // no effect
             /*
             b.setLayoutParams(new ViewGroup.LayoutParams(
                     android.app.ActionBar.LayoutParams.WRAP_CONTENT,
@@ -61,13 +69,12 @@ public class MainActivity extends AppCompatActivity {
                     //if (n != null) {
                         switch (event.getAction()) {
                             case MotionEvent.ACTION_DOWN:
-                                gen.setFreq(n.freq);
-                                if (!playing) start();
+                                toneGen.noteON(n.freq);
                                 break;
 
                             case MotionEvent.ACTION_UP:
                             case MotionEvent.ACTION_CANCEL:
-                                stop();
+                                toneGen.noteOFF();
                                 break;
                         }
                     //}
@@ -81,48 +88,19 @@ public class MainActivity extends AppCompatActivity {
         // https://developer.android.com/training/managing-audio/volume-playback.html
     }
 
-    SineToneGen gen=new SineToneGen();
+    @Override
+    public void onResume() {
+        super.onResume();
+        toneGen.resumeAudio();
 
-    synchronized void start() {
-        playThread = new Thread(){
+    }
 
-            public void run() {
-                playing = true;
-                int bufSize = AudioTrack.getMinBufferSize(
-                        sampleRate,
-                        AudioFormat.CHANNEL_OUT_MONO,
-                        AudioFormat.ENCODING_PCM_16BIT);
+    @Override
+    public void onPause() {
+        super.onPause();
+        toneGen.noteOFF();
+        toneGen.pauseAudio();
 
-                audTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                        sampleRate,
-                        AudioFormat.CHANNEL_OUT_MONO,
-                        AudioFormat.ENCODING_PCM_16BIT,
-
-                        bufSize, AudioTrack.MODE_STREAM
-                );
-                //audTrack.setVolume((float)(audTrack.getMaxVolume() * 0.8));
-                // requires api level >= 21 (it was 15 by default)
-
-                setPriority(Thread.MAX_PRIORITY);
-
-                if (DB) System.out.println("buffer size is "+bufSize);
-                gen.setBufSize(bufSize);
-                gen.reset();
-                gen.setSampleRate(sampleRate);
-
-                audTrack.play();
-                int loops=0;
-                while (playing) {
-                    short[] next=gen.nextBuf();
-                    int rs=audTrack.write(next,0,next.length);
-                    if (DB && loops<100) {
-                        System.out.println("audTrack.write() rs="+rs); loops++;
-                    }
-                }
-            }
-
-        };
-        playThread.start();
     }
 
     void alert(String title, String msg) {
@@ -132,14 +110,5 @@ public class MainActivity extends AppCompatActivity {
         // apparently, it's a common Android bug
     }
 
-    synchronized void stop() {
-        if (audTrack.getState() == AudioTrack.STATE_INITIALIZED) {
-            audTrack.stop();
-            playing = false;
-            try { playThread.join(); } catch (Exception ignore) { }
-            audTrack.release();
-        }
-
-    }
 
 }
