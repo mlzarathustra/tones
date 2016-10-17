@@ -1,0 +1,56 @@
+#!/bin/bash
+
+if [ ! "$1" ]; then 
+  echo '
+
+    Enter an image file name on the command line
+    this will create directories for android icons
+    and resize the image into each one
+  '
+  exit
+fi
+
+file=$1
+echo converting $file
+
+(echo $file |grep - -- - )&& echo '
+   warning: the character dash (-) is not valid
+   for a resource name.
+'
+
+if [ ! -f $file ]; then 
+    echo $file does not exist!
+    exit
+fi
+
+echo removing icons directory
+rm -r icons
+
+function process() {
+   while [ $1 ]; do
+      nm=$1
+      shift
+      sz=$1
+      shift
+
+      dir=icons/mipmap-$nm
+      mkdir -p $dir
+
+      convert $file -resize ${sz}x${sz} $dir/$file
+      echo $nm $sz
+   done
+
+}
+
+
+
+list='hdpi 72 mdpi 48 xhdpi 96 xxhdpi 144 xxxhdpi 192'
+
+process $list
+
+identify $(find icons -type f) 
+
+cd icons
+tar -czvf ../icons-`dt`.taz . 
+
+
