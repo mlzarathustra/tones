@@ -4,21 +4,21 @@ package net.miles_beyond.tones.synth;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.media.audiofx.EnvironmentalReverb;
+import android.media.audiofx.PresetReverb;
 
 public class ToneGen {
 
     private boolean DB=false;
 
-    private double freq=440;
     private int sampleRate = 44100;
     private Thread playThread;
     private boolean playing;
     private AudioTrack audTrack;
     private int bufSize;
 
-
     //  STUB
-    private SineWaveGen waveGen = new SineWaveGen();
+    private WaveGen waveGen = new SineWaveGen();
 
 
     public void resumeAudio() {
@@ -34,6 +34,13 @@ public class ToneGen {
 
                 bufSize, AudioTrack.MODE_STREAM
         );
+
+        try {
+            PresetReverb reverb = new PresetReverb(0, 0); // can't create in simulation phone
+            audTrack.attachAuxEffect(reverb.getId());
+        }
+        catch (Exception ignore) {}
+
         //audTrack.setVolume((float)(audTrack.getMaxVolume() * 0.8));
         // requires api level >= 21 (it was 15 by default)
     }
@@ -74,6 +81,9 @@ public class ToneGen {
 
     private synchronized void stop() {
         if (audTrack.getState() == AudioTrack.STATE_INITIALIZED) {
+            // prevent click when note is released:
+            audTrack.setStereoVolume(0,0);  // setVolume requires API 21
+            
             audTrack.stop();
             playing = false;
             try { playThread.join(); } catch (Exception ignore) { }
@@ -82,12 +92,15 @@ public class ToneGen {
 
     public void noteON(double freq) {
         waveGen.setFreq(freq);
+        audTrack.setStereoVolume(1,1);
         if (!playing) start();
     }
 
     public void noteOFF() {
         stop(); // XXX - should wait for release before stopping
     }
+
+    public boolean isPlaying() { return playing; }
 
 
 }

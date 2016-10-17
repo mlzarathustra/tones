@@ -1,15 +1,8 @@
 package net.miles_beyond.tones.synth;
 
-public class SineWaveGen {
-    static int DEFAULT_SAMPLE_RATE=44100; // per second
-    static double DEFAULT_FREQ=440;       // hz
+public class SineWaveGen extends WaveGen {
 
-    short[] samples;
-    double freq = 440, phase=0, twoPI=Math.PI*2.0;
-    int amp = 10000, sampleRate=44100;
-
-    int loops=3;
-
+    double phase=0, twoPI=Math.PI*2.0;
 
     SineWaveGen() { this(1,DEFAULT_SAMPLE_RATE); }
     SineWaveGen(int bufSize, int sampleRate) { this(bufSize, sampleRate, DEFAULT_FREQ); }
@@ -33,10 +26,7 @@ public class SineWaveGen {
         return samples;
     }
 
-    public void setFreq(double freq) { this.freq = freq; }
-    public void setBufSize(int bufSize) {
-        if (samples == null || samples.length != bufSize) samples=new short[bufSize];
-    }
-    public void setSampleRate(int sr) { sampleRate = sr; }
+
+
 
 }
