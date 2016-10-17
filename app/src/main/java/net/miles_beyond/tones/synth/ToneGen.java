@@ -17,9 +17,13 @@ public class ToneGen {
     private AudioTrack audTrack;
     private int bufSize;
 
-    //  STUB
-    private WaveGen waveGen = new SineWaveGen();
 
+    private WaveGen waveGen = WaveGen.getWaveGen("sine");
+    public void setWaveGen(String s) {
+        waveGen = WaveGen.getWaveGen(s);
+        waveGen.setBufSize(bufSize);
+        waveGen.setSampleRate(sampleRate);
+    }
 
     public void resumeAudio() {
         bufSize = AudioTrack.getMinBufferSize(
@@ -83,7 +87,7 @@ public class ToneGen {
         if (audTrack.getState() == AudioTrack.STATE_INITIALIZED) {
             // prevent click when note is released:
             audTrack.setStereoVolume(0,0);  // setVolume requires API 21
-            
+
             audTrack.stop();
             playing = false;
             try { playThread.join(); } catch (Exception ignore) { }

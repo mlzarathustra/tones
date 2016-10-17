@@ -5,8 +5,10 @@ import android.media.AudioManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Layout;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -22,17 +24,13 @@ public class MainActivity extends AppCompatActivity {
 
     boolean sharps=false;
     boolean hold=false;
-    double baseFreq=440;
+    double baseFreq=220;
     ToneGen toneGen=new ToneGen();
     HashMap<Button,Note> noteMap=new HashMap<>();
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    Button pressedButton;
 
-        setContentView(R.layout.activity_main);
-        LinearLayout layout = (LinearLayout) findViewById(R.id.keys);
-
+    private void addNotes(LinearLayout layout) {
         for (Note n : Note.notes) {
 
             Button b = new Button(this);
@@ -48,17 +46,16 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     System.out.println(event);
-                    Note n=noteMap.get(v);
-                    System.out.println("onTouch: "+n);
+                    //System.out.println("onTouch: "+n);
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
-                            if (hold && toneGen.isPlaying()) toneGen.noteOFF();
-                            else toneGen.noteON(baseFreq * n.freq);
+                            if (hold && toneGen.isPlaying()) noteOFF();
+                            else noteON((Button) v);
                             break;
 
                         case MotionEvent.ACTION_UP:
                         case MotionEvent.ACTION_CANCEL:
-                            if (!hold) toneGen.noteOFF();
+                            if (!hold) noteOFF();
                             break;
                     }
                     return false;
@@ -66,29 +63,85 @@ public class MainActivity extends AppCompatActivity {
             });
             noteMap.put(b,n);
         }
+    }
 
-
-        //  TODO - restore from saved config
-
-        //  Align config UI with settings
+    private void alignUIWithSettings() {
+        //  hold
         //
-        Spinner wave=(Spinner) findViewById(R.id.wave);
-        ArrayAdapter<CharSequence> waveList=
-                new ArrayAdapter<CharSequence>(this, R.layout.support_simple_spinner_dropdown_item,
-                        WaveGen.getKeys());
-        wave.setAdapter(waveList);
-
-        CheckBox sharpsCheckBox=(CheckBox) findViewById(R.id.sharps);
-        sharpsCheckBox.setChecked(sharps);
-
         CheckBox holdCheckBox=(CheckBox) findViewById(R.id.hold);
         holdCheckBox.setChecked(hold);
 
-        Spinner octave=(Spinner) findViewById(R.id.octave);
-
-
+        // sharps
         //
-        // end align config UI
+        CheckBox sharpsCheckBox=(CheckBox) findViewById(R.id.sharps);
+        sharpsCheckBox.setChecked(sharps);
+
+        //  octave
+        //
+        Spinner octaveSpinner=(Spinner) findViewById(R.id.octave);
+        String octaveStr=""+(int)baseFreq;
+        for (int pos=0; pos<octaveSpinner.getCount(); ++pos) {
+            String item=octaveSpinner.getItemAtPosition(pos).toString();
+            //System.out.println(item);
+            if (octaveStr.equals(item)) {
+                octaveSpinner.setSelection(pos);
+                break;
+            }
+        }
+        octaveSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String octSelected=parent.getItemAtPosition(position).toString();
+                System.out.println("octave selected: "+parent.getItemAtPosition(position));
+                try {
+                    baseFreq = Double.parseDouble(octSelected);
+                    noteREPLAY();
+                }
+                catch (Exception ex) {
+                    System.out.println("Setting octave: "+ex);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) { }
+        });
+
+
+        //  wave
+        //
+        Spinner waveSpinner=(Spinner) findViewById(R.id.wave);
+        ArrayAdapter<CharSequence> waveList=
+                new ArrayAdapter<CharSequence>(this, R.layout.support_simple_spinner_dropdown_item,
+                        WaveGen.getKeys());
+        waveSpinner.setAdapter(waveList);
+        waveSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String waveSelected = parent.getItemAtPosition(position).toString();
+                System.out.println("wave selected: "+waveSelected);
+                Button pb=pressedButton;
+                if (pb != null) noteOFF();
+                toneGen.setWaveGen(waveSelected);
+                if (pb != null) noteON(pb);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) { }
+        });
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_main);
+        LinearLayout layout = (LinearLayout) findViewById(R.id.keys);
+
+        addNotes(layout);
+
+        //  TODO - restore from saved config
+
+        alignUIWithSettings();
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC); // recommended
         // https://developer.android.com/training/managing-audio/volume-playback.html
@@ -103,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        toneGen.noteOFF();
+        noteOFF();
         toneGen.pauseAudio();
 
         //  TODO - save config
@@ -116,6 +169,30 @@ public class MainActivity extends AppCompatActivity {
         // apparently, it's a common Android bug
     }
 
+    void noteON(Button b) {
+        Note n=noteMap.get(b);
+        toneGen.noteON(baseFreq * n.freq);
+        pressedButton=b;
+        pressedButton.setBackgroundColor(Color.GRAY);
+    }
+
+    void noteOFF() {
+        toneGen.noteOFF();
+        if (pressedButton != null) {
+            Note n = noteMap.get(pressedButton);
+            pressedButton.setBackgroundColor(n.white ? Color.WHITE : Color.BLACK);
+            pressedButton = null;
+        }
+    }
+
+    void noteREPLAY() {
+        if (pressedButton != null) {
+            Button pb = pressedButton; // noteOFF will set it to null
+            noteOFF(); noteON(pb);
+        }
+
+    }
+
     public void setSharps(View v) {
         sharps =((CheckBox)v).isChecked();
         for (Button b : noteMap.keySet()) {
@@ -125,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
     }
     public void setHold(View v) {
         hold=((CheckBox)v).isChecked();
+        if (!hold) noteOFF();
     }
 
 
