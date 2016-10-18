@@ -11,7 +11,7 @@ halfStep=0
 list = keys.collect {
    
    if (it == '+') names=[letters[key++]]
-   else names=[letters[key-1]+'#',letters[key%7]+'b']
+   else names=[letters[key-1]+'#',letters[key%7]+'\\u266D'] // 266D=flat
    
    flatName=names[-1]
    sharpName=names[0]

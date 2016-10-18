@@ -20,4 +20,5 @@ class SquareWaveGen extends WaveGen {
     void reset() {
         phase = 0;
     }
+
 }

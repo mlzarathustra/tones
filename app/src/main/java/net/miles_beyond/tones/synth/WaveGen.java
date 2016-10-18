@@ -12,6 +12,8 @@ public abstract class WaveGen {
     double freq = 440;
     int amp = 10000, sampleRate=44100;
 
+    private String waveLabel;
+
     void setBufSize(int bufSize) {
         if (samples == null || samples.length != bufSize) samples=new short[bufSize];
     }
@@ -24,14 +26,14 @@ public abstract class WaveGen {
 
     //  Manage subclasses (the concrete wave generators)
     static HashMap<String,Class> concreteClasses=new HashMap<>();
-    private static String keyStrip(String s) {
+    public static String keyStrip(String s) {
         return s.toLowerCase().replaceAll("[^a-z]","");
     }
     private static void register(String key, Class c) {
         concreteClasses.put(keyStrip(key), c);
     }
 
-    public static ArrayList getKeys() {  // should be CharSequence
+    public static ArrayList<String> getKeys() {  // should be CharSequence
         ArrayList<String> list=new ArrayList<>(concreteClasses.keySet());
         Collections.sort(list);
         return list;
@@ -40,14 +42,22 @@ public abstract class WaveGen {
     static WaveGen getWaveGen(String key) {
         Class wgClass = concreteClasses.get(keyStrip(key));
         try {
-            return (WaveGen) wgClass.newInstance();
+            WaveGen wg = (WaveGen) wgClass.newInstance();
+            wg.setWaveLabel(key);
+            return wg;
         }
         catch (Exception ex) {
             return new SineWaveGen();
         }
     }
+    private void setWaveLabel(String key) { waveLabel=keyStrip(key); }
+    String getWaveLabel() { return waveLabel; }
 
     static {
+        // The labels are repeated in the concrete classes
+        // as static elements. Otherwise, the class load could
+        // deadlock here.  Is there a good way to do this without
+        // repeating the labels?
         WaveGen.register("sine", SineWaveGen.class);
         WaveGen.register("square", SquareWaveGen.class);
     }

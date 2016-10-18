@@ -1,5 +1,6 @@
 package net.miles_beyond.tones;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.support.v7.app.AlertDialog;
@@ -19,8 +20,11 @@ import net.miles_beyond.tones.synth.ToneGen;
 import net.miles_beyond.tones.synth.WaveGen;
 
 import java.util.HashMap;
+import java.util.prefs.Preferences;
 
 public class MainActivity extends AppCompatActivity {
+
+    boolean DB=false;
 
     boolean sharps=false;
     boolean hold=false;
@@ -45,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             b.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    System.out.println(event);
+                    if (DB) System.out.println(event);
                     //System.out.println("onTouch: "+n);
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
@@ -63,6 +67,24 @@ public class MainActivity extends AppCompatActivity {
             });
             noteMap.put(b,n);
         }
+    }
+
+    private void restoreSavedSettings() {
+        SharedPreferences p=getPreferences(0);
+        hold = p.getBoolean("hold", false);
+        setSharps(p.getBoolean("sharps", false));
+        baseFreq = p.getFloat("octave", 220);
+        toneGen.setWaveGen(p.getString("wave","sine"));
+    }
+
+    private void saveSettings() {
+        SharedPreferences p=getPreferences(0);
+        SharedPreferences.Editor e=p.edit();
+        e.putBoolean("hold",hold);
+        e.putBoolean("sharps",sharps);
+        e.putFloat("octave",(float)baseFreq); // N.B. should we restrict to int?
+        e.putString("wave",toneGen.getWaveLabel());
+        e.apply();
     }
 
     private void alignUIWithSettings() {
@@ -92,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String octSelected=parent.getItemAtPosition(position).toString();
-                System.out.println("octave selected: "+parent.getItemAtPosition(position));
+                if (DB) System.out.println("octave selected: "+parent.getItemAtPosition(position));
                 try {
                     baseFreq = Double.parseDouble(octSelected);
                     noteREPLAY();
@@ -109,16 +131,34 @@ public class MainActivity extends AppCompatActivity {
 
         //  wave
         //
+        //   todo - for some reason, using the ArrayAdapter causes a gap above.
+        //          neither debugging nor using the hierarchy viewer helped.
+        //
         Spinner waveSpinner=(Spinner) findViewById(R.id.wave);
-        ArrayAdapter<CharSequence> waveList=
-                new ArrayAdapter<CharSequence>(this, R.layout.support_simple_spinner_dropdown_item,
+        ArrayAdapter<String> waveList=
+                new ArrayAdapter<>(this,
+                        R.layout.support_simple_spinner_dropdown_item,
                         WaveGen.getKeys());
-        waveSpinner.setAdapter(waveList);
+        try {
+            waveSpinner.setAdapter(waveList);
+        }
+        catch (NullPointerException ex) {
+            System.err.println("Error setting wave list " + ex);
+        }
+
+        String wave=toneGen.getWaveLabel();
+        for (int pos=0; pos<waveSpinner.getCount(); ++pos) {
+            if (WaveGen.keyStrip(waveSpinner.getItemAtPosition(pos).toString()).equals(wave)) {
+                waveSpinner.setSelection(pos);
+                break;
+            }
+        }
+
         waveSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String waveSelected = parent.getItemAtPosition(position).toString();
-                System.out.println("wave selected: "+waveSelected);
+                if (DB) System.out.println("wave selected: "+waveSelected);
                 Button pb=pressedButton;
                 if (pb != null) noteOFF();
                 toneGen.setWaveGen(waveSelected);
@@ -139,8 +179,7 @@ public class MainActivity extends AppCompatActivity {
 
         addNotes(layout);
 
-        //  TODO - restore from saved config
-
+        restoreSavedSettings();
         alignUIWithSettings();
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC); // recommended
@@ -158,8 +197,7 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         noteOFF();
         toneGen.pauseAudio();
-
-        //  TODO - save config
+        saveSettings();
     }
 
     void alert(String title, String msg) {
@@ -193,13 +231,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void setSharps(View v) {
-        sharps =((CheckBox)v).isChecked();
+    private void setSharps(boolean s) {
+        sharps = s;
         for (Button b : noteMap.keySet()) {
             Note n=noteMap.get(b);
             b.setText(sharps?n.sharpName:n.flatName);
         }
     }
+    public void setSharps(View v) {
+        setSharps(((CheckBox)v).isChecked());
+    }
+
     public void setHold(View v) {
         hold=((CheckBox)v).isChecked();
         if (!hold) noteOFF();

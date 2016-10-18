@@ -1,25 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 
-    <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/main_layout"
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_layout"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:orientation="horizontal"
+    android:columnCount="3"
+    >
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:fillViewport="true"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:orientation="horizontal"
-        android:columnCount="3"
+        android:scrollbars="vertical"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:scrollbarStyle="insideOverlay"
+        android:layout_columnWeight="1"
         >
-        <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:fillViewport="true"
+
+
+        <LinearLayout
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:scrollbars="vertical"
-            android:scrollbarAlwaysDrawVerticalTrack="true"
-            android:scrollbarStyle="insideOverlay"
-            android:layout_columnWeight="1"
-            >
-
-
+            android:orientation="horizontal">
+            <Space
+                android:layout_width="35dp"
+                android:layout_height="match_parent" />
             <LinearLayout
                 xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
@@ -36,75 +43,80 @@
                 >
 
             </LinearLayout>
+        </LinearLayout>
 
-        </ScrollView>
+    </ScrollView>
+    <Space
+        android:layout_width="20dp"
+        />
+    <GridLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:columnCount="1"
+        >
         <Space
-            android:layout_width="20dp"
+            android:layout_height="60dp"
             />
-        <GridLayout
+        <TextView
+            android:text="@string/settings"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/colorPrimaryDark"
+            android:layout_width="wrap_content" />
+
+        <CheckBox
+            android:layout_gravity="left"
+            android:text="hold"
+            android:id="@+id/hold"
+            android:onClick="setHold"
+            />
+
+        <CheckBox
+            android:text="sharps"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:columnCount="1"
-            >
-            <Space
-                android:layout_height="60dp"
-                />
-            <TextView
-                android:text="@string/settings"
-                android:layout_gravity="center_horizontal"
-                android:textColor="@color/colorPrimaryDark"
-                android:layout_width="wrap_content" />
+            android:layout_height="wrap_content"
+            android:id="@+id/sharps"
+            tools:layout_gravity="left"
+            android:onClick="setSharps"
+            />
+        <Space
+            android:layout_height="10dp"
+            />
+        <TextView
+            android:text="@string/octave"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/colorPrimaryDark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
-            <CheckBox
-                android:layout_gravity="left"
-                android:text="hold"
-                android:id="@+id/hold"
-                android:onClick="setHold"
-                />
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/octave"
+            tools:layout_gravity="center_horizontal"
+            android:entries="@array/octaves"
+            android:dropDownSelector="@color/colorPrimaryDark"
 
-            <CheckBox
-                android:text="sharps"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/sharps"
-                tools:layout_gravity="left"
-                android:onClick="setSharps"
-                />
-            <Space
-                android:layout_height="10dp"
-                />
-            <TextView
-                android:text="@string/octave"
-                android:layout_gravity="center_horizontal"
-                android:textColor="@color/colorPrimaryDark"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+            />
 
-            <Spinner
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/octave"
-                tools:layout_gravity="center_horizontal"
-                android:entries="@array/octaves"
-                android:dropDownSelector="@color/colorPrimaryDark"
+        <Space
+            android:layout_height="15dp"
+            />
+        <TextView
+            android:text="@string/wave"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/colorPrimaryDark"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content" />
 
-                />
-
-            <TextView
-                android:text="@string/wave"
-                android:layout_gravity="center_horizontal"
-                android:textColor="@color/colorPrimaryDark"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content" />
-
-            <Spinner
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/wave"
-                tools:layout_gravity="center_horizontal"
-                android:layout_gravity="center"
-                />
-
-        </GridLayout>
+        <Spinner
+            android:entries="@array/waves"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/wave"
+            tools:layout_gravity="center_horizontal"
+            android:layout_gravity="center"
+            />
 
     </GridLayout>
+
+</GridLayout>

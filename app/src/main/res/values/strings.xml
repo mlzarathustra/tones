@@ -3,6 +3,10 @@
     <string name="settings">Settings</string>
     <string name="octave">Octave</string>
     <string name="wave">Wave Form</string>
+    <string-array name="waves"> <!-- attempt to remove margin above spinner -->
+        <item>sine</item>
+        <item>square</item>
+    </string-array>
     <string-array name="octaves">
         <item>110</item>
         <item>220</item>

@@ -32,5 +32,4 @@ class SineWaveGen extends WaveGen {
 
 
 
-
 }

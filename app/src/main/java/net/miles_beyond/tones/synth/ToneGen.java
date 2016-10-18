@@ -24,6 +24,10 @@ public class ToneGen {
         waveGen.setBufSize(bufSize);
         waveGen.setSampleRate(sampleRate);
     }
+    public String getWaveLabel() {
+        if (waveGen == null) return "";
+        return waveGen.getWaveLabel();
+    }
 
     public void resumeAudio() {
         bufSize = AudioTrack.getMinBufferSize(
