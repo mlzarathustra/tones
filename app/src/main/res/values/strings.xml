@@ -6,12 +6,16 @@
     <string-array name="waves"> <!-- attempt to remove margin above spinner -->
         <item>sine</item>
         <item>square</item>
+        <item>saw</item>
+        <item>pwm</item>
     </string-array>
     <string-array name="octaves">
         <item>110</item>
         <item>220</item>
         <item>440</item>
     </string-array>
+
+    <color name="black">#000000</color>
 
 
 </resources>

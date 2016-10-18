@@ -54,12 +54,11 @@ public abstract class WaveGen {
     String getWaveLabel() { return waveLabel; }
 
     static {
-        // The labels are repeated in the concrete classes
-        // as static elements. Otherwise, the class load could
-        // deadlock here.  Is there a good way to do this without
-        // repeating the labels?
+        //
         WaveGen.register("sine", SineWaveGen.class);
         WaveGen.register("square", SquareWaveGen.class);
+        WaveGen.register("saw", SawWaveGen.class);
+        WaveGen.register("pwm", PWMWaveGen.class);
     }
 
 

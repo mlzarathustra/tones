@@ -131,10 +131,13 @@ public class MainActivity extends AppCompatActivity {
 
         //  wave
         //
+
+        Spinner waveSpinner=(Spinner) findViewById(R.id.wave);
+        /*
         //   todo - for some reason, using the ArrayAdapter causes a gap above.
         //          neither debugging nor using the hierarchy viewer helped.
+        //          for now, the values are in strings.xml
         //
-        Spinner waveSpinner=(Spinner) findViewById(R.id.wave);
         ArrayAdapter<String> waveList=
                 new ArrayAdapter<>(this,
                         R.layout.support_simple_spinner_dropdown_item,
@@ -145,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
         catch (NullPointerException ex) {
             System.err.println("Error setting wave list " + ex);
         }
+        */
 
         String wave=toneGen.getWaveLabel();
         for (int pos=0; pos<waveSpinner.getCount(); ++pos) {

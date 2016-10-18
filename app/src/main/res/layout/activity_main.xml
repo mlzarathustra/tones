@@ -48,6 +48,7 @@
     </ScrollView>
     <Space
         android:layout_width="20dp"
+        android:backgroundTint="@color/colorPrimaryDark"
         />
     <GridLayout
         android:layout_width="wrap_content"
@@ -100,6 +101,7 @@
 
         <Space
             android:layout_height="15dp"
+            android:background="@color/black"
             />
         <TextView
             android:text="@string/wave"
