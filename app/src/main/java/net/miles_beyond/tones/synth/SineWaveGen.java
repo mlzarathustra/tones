@@ -4,6 +4,7 @@ class SineWaveGen extends WaveGen {
 
     static double twoPI=Math.PI*2.0;
     private double phase=0;
+    private int scaledAmp;
 
     SineWaveGen() { this(1,DEFAULT_SAMPLE_RATE); }
     SineWaveGen(int bufSize, int sampleRate) { this(bufSize, sampleRate, DEFAULT_FREQ); }
@@ -15,6 +16,13 @@ class SineWaveGen extends WaveGen {
     }
 
     @Override
+    void setFreq(double freq) {
+        super.setFreq(freq);
+        scaledAmp = (int)(amp * (1.0 + 55.0/(2*freq) ));
+        // pitch scaling, to help out the bass notes
+    }
+
+    @Override
     public void reset() { phase=0; }
 
     @Override
@@ -23,7 +31,7 @@ class SineWaveGen extends WaveGen {
 
         while (phase > twoPI) phase -= twoPI;
         for (int i = 0; i< samples.length; ++i) {
-            samples[i] = (short) (amp * Math.sin(phase));
+            samples[i] = (short) (scaledAmp * Math.sin(phase));
             phase += twoPI * freq / sampleRate;
         }
         //if (loops<3) { loops++; System.out.println(Arrays.toString(samples)); }

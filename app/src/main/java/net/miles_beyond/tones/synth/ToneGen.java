@@ -100,8 +100,9 @@ public class ToneGen {
 
     public void noteON(double freq) {
         waveGen.setFreq(freq);
-        audTrack.setStereoVolume(1,1);
         if (!playing) start();
+        audTrack.setStereoVolume(1,1);
+
     }
 
     public void noteOFF() {
