@@ -14,6 +14,11 @@
         <item>220</item>
         <item>440</item>
     </string-array>
+    <string-array name="envelopes">
+        <item>organ</item>
+        <item>clavier</item>
+        <item>fade</item>
+    </string-array>
 
     <color name="black">#000000</color>
 

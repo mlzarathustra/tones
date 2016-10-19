@@ -6,11 +6,9 @@ import android.media.AudioManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Layout;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -18,9 +16,9 @@ import android.widget.Spinner;
 
 import net.miles_beyond.tones.synth.ToneGen;
 import net.miles_beyond.tones.synth.WaveGen;
+import static net.miles_beyond.tones.Util.keyStrip;
 
 import java.util.HashMap;
-import java.util.prefs.Preferences;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -75,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
         setSharps(p.getBoolean("sharps", false));
         baseFreq = p.getFloat("octave", 220);
         toneGen.setWaveGen(p.getString("wave","sine"));
+        toneGen.setEnvGen(p.getString("env","organ"));
     }
 
     private void saveSettings() {
@@ -83,8 +82,10 @@ public class MainActivity extends AppCompatActivity {
         e.putBoolean("hold",hold);
         e.putBoolean("sharps",sharps);
         e.putFloat("octave",(float)baseFreq); // N.B. should we restrict to int?
-        e.putString("wave",toneGen.getWaveLabel());
+        e.putString("wave",toneGen.getWaveKey());
+        e.putString("env", toneGen.getEnvKey());
         e.apply();
+        System.out.println("Settings saved.");
     }
 
     private void alignUIWithSettings() {
@@ -150,9 +151,9 @@ public class MainActivity extends AppCompatActivity {
         }
         */
 
-        String wave=toneGen.getWaveLabel();
+        String waveKey=toneGen.getWaveKey();
         for (int pos=0; pos<waveSpinner.getCount(); ++pos) {
-            if (WaveGen.keyStrip(waveSpinner.getItemAtPosition(pos).toString()).equals(wave)) {
+            if (keyStrip(waveSpinner.getItemAtPosition(pos).toString()).equals(waveKey)) {
                 waveSpinner.setSelection(pos);
                 break;
             }
@@ -165,13 +166,40 @@ public class MainActivity extends AppCompatActivity {
                 if (DB) System.out.println("wave selected: "+waveSelected);
                 Button pb=pressedButton;
                 if (pb != null) noteOFF();
-                toneGen.setWaveGen(waveSelected);
+                toneGen.setWaveGen(keyStrip(waveSelected));
                 if (pb != null) noteON(pb);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) { }
         });
+
+
+        //   envelope
+        //
+        Spinner envSpinner=(Spinner) findViewById(R.id.env);
+        String envKey=keyStrip(toneGen.getEnvKey());
+
+        for (int pos=0; pos<envSpinner.getCount(); ++pos) {
+            if (keyStrip(envSpinner.getItemAtPosition(pos).toString()).equals(envKey)) {
+                envSpinner.setSelection(pos);
+                break;
+            }
+        }
+         envSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                 String envSelected = parent.getItemAtPosition(position).toString();
+                 System.out.println("env selected: "+envSelected);
+                 toneGen.setEnvGen(keyStrip(envSelected));
+
+                 // todo - complete implementation
+                 // copy current level from toneGen.envGen?
+             }
+
+             @Override
+             public void onNothingSelected(AdapterView<?> parent) { }
+         });
     }
 
     @Override

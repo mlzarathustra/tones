@@ -6,18 +6,12 @@ class SineWaveGen extends WaveGen {
     private double phase=0;
     private int scaledAmp;
 
-    SineWaveGen() { this(1,DEFAULT_SAMPLE_RATE); }
-    SineWaveGen(int bufSize, int sampleRate) { this(bufSize, sampleRate, DEFAULT_FREQ); }
-
-    SineWaveGen(int bufSize, int sampleRate, double freq) {
-        samples = new short[bufSize];
-        this.sampleRate = sampleRate;
-        this.freq = freq;
-    }
-
     @Override
     void setFreq(double freq) {
         super.setFreq(freq);
+
+        //scaledAmp = amp;
+
         scaledAmp = (int)(amp * (1.0 + 55.0/(2*freq) ));
         // pitch scaling, to help out the bass notes
     }

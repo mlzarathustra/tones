@@ -4,7 +4,6 @@ package net.miles_beyond.tones.synth;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.media.audiofx.EnvironmentalReverb;
 import android.media.audiofx.PresetReverb;
 
 public class ToneGen {
@@ -19,14 +18,24 @@ public class ToneGen {
 
 
     private WaveGen waveGen = WaveGen.getWaveGen("sine");
+    private EnvGen envGen = new EnvGen("organ");
+
     public void setWaveGen(String s) {
         waveGen = WaveGen.getWaveGen(s);
         waveGen.setBufSize(bufSize);
         waveGen.setSampleRate(sampleRate);
     }
-    public String getWaveLabel() {
+    public void setEnvGen(String s) {
+        envGen = new EnvGen(s);
+    }
+
+    public String getWaveKey() {
         if (waveGen == null) return "";
-        return waveGen.getWaveLabel();
+        return waveGen.getWaveKey();
+    }
+
+    public String getEnvKey() {
+        return envGen.getEnvKey();
     }
 
     public void resumeAudio() {
@@ -75,7 +84,15 @@ public class ToneGen {
 
                 int loops=0;
                 while (playing) {
+                    if (envGen.isComplete()) {
+                        audTrack.stop();
+                        playing = false;
+                        break;
+                    }
                     short[] next= waveGen.nextBuf();
+                    for (int i=0; i<next.length; ++i) {
+                        next[i] *= envGen.nextVal();
+                    }
                     int rs=audTrack.write(next,0,next.length);
                     if (DB && loops<100) {
                         System.out.println("audTrack.write() rs="+rs); loops++;
@@ -102,11 +119,14 @@ public class ToneGen {
         waveGen.setFreq(freq);
         if (!playing) start();
         audTrack.setStereoVolume(1,1);
+        envGen.noteON();
 
     }
 
     public void noteOFF() {
-        stop(); // XXX - should wait for release before stopping
+        //stop();
+        envGen.noteOFF();
+        // todo  - should wait for release before stopping... or not stop until app is paused
     }
 
     public boolean isPlaying() { return playing; }

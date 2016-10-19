@@ -44,8 +44,8 @@ class Step {
     boolean isComplete(double level) {
         return
                 (delta == 0) ||
-                        (delta > 0 && level >= destLevel) ||
-                        (delta < 0 && level <= destLevel);
+                (delta > 0 && level >= destLevel) ||
+                (delta < 0 && level <= destLevel);
     }
 }
 
