@@ -14,7 +14,7 @@ public abstract class WaveGen {
 
     private String waveLabel;
 
-    void setBufSize(int bufSize) {
+    void setBufSize(int bufSize) { // typically: 4104
         if (samples == null || samples.length != bufSize) samples=new short[bufSize];
     }
     void setSampleRate(int sr) { sampleRate = sr; }
