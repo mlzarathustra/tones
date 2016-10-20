@@ -72,8 +72,8 @@ public class MainActivity extends AppCompatActivity {
         hold = p.getBoolean("hold", false);
         setSharps(p.getBoolean("sharps", false));
         baseFreq = p.getFloat("octave", 220);
-        toneGen.setWaveGen(p.getString("wave","sine"));
-        toneGen.setEnvGen(p.getString("env","organ"));
+        toneGen.setWaveGen(p.getString("wave","mellow"));
+        toneGen.setEnvGen(p.getString("env","fade"));
     }
 
     private void saveSettings() {

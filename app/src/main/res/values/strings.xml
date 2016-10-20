@@ -4,10 +4,13 @@
     <string name="octave">Octave</string>
     <string name="wave">Wave Form</string>
     <string-array name="waves"> <!-- attempt to remove margin above spinner -->
+        <item>mellow</item>
+        <item>organ</item>
+        <item>bell</item>
+        <item>pwm</item>
         <item>sine</item>
         <item>square</item>
         <item>saw</item>
-        <item>pwm</item>
     </string-array>
     <string-array name="octaves">
         <item>110</item>
@@ -15,9 +18,9 @@
         <item>440</item>
     </string-array>
     <string-array name="envelopes">
-        <item>organ</item>
-        <item>clavier</item>
         <item>fade</item>
+        <item>clavier</item>
+        <item>organ</item>
     </string-array>
 
     <color name="black">#000000</color>

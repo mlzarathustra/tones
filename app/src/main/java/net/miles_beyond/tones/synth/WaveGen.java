@@ -49,7 +49,7 @@ public abstract class WaveGen {
             return new SineWaveGen();
         }
     }
-    private void setWaveKey(String key) { waveKey =keyStrip(key); }
+    protected void setWaveKey(String key) { waveKey =keyStrip(key); }
     String getWaveKey() { return waveKey; }
 
     static {
@@ -58,6 +58,9 @@ public abstract class WaveGen {
         WaveGen.register("square", SquareWaveGen.class);
         WaveGen.register("saw", SawWaveGen.class);
         WaveGen.register("pwm", PWMWaveGen.class);
+        WaveGen.register("mellow", CompositeWaveGen.class);
+        WaveGen.register("bell", CompositeWaveGen.class);
+        WaveGen.register("organ", CompositeWaveGen.class);
     }
 
 

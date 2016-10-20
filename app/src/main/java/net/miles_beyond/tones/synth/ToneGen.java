@@ -126,7 +126,6 @@ public class ToneGen {
     public void noteOFF() {
         //stop();
         envGen.noteOFF();
-        // todo  - should wait for release before stopping... or not stop until app is paused
     }
 
     public boolean isPlaying() { return playing; }
