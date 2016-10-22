@@ -5,6 +5,8 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.audiofx.PresetReverb;
+import android.os.Handler;
+import android.os.Message;
 
 public class ToneGen {
 
@@ -19,6 +21,8 @@ public class ToneGen {
 
     private WaveGen waveGen = WaveGen.getWaveGen("sine");
     private EnvGen envGen = new EnvGen("organ");
+
+    private Handler noteOffHandler;   //  ##GREY
 
     public void setWaveGen(String s) {
         waveGen = WaveGen.getWaveGen(s);
@@ -37,6 +41,8 @@ public class ToneGen {
     public String getEnvKey() {
         return envGen.getEnvKey();
     }
+
+    public void setNoteOffHandler(Handler h) { noteOffHandler=h; }
 
     public void resumeAudio() {
         bufSize = AudioTrack.getMinBufferSize(
@@ -87,7 +93,11 @@ public class ToneGen {
                     if (envGen.isComplete()) {
                         audTrack.stop();
                         playing = false;
+                        //System.out.println("UNGREY - here");  //  ##GREY
+//                        noteOffHandler.sendMessage(Message.obtain(noteOffHandler));
+                        noteOffHandler.sendMessage(noteOffHandler.obtainMessage());
                         break;
+
                     }
                     short[] next= waveGen.nextBuf();
                     for (int i=0; i<next.length; ++i) {
@@ -102,6 +112,10 @@ public class ToneGen {
 
         };
         playThread.start();
+        // todo - wait for join, then return back to the display thread?
+        //          so it can turn the note off when it's done sounding
+        //          We can't hold up here, because the calling function
+        //          has to do a few things to start playing after this.
     }
 
     private synchronized void stop() {

@@ -3,6 +3,8 @@ package net.miles_beyond.tones;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.AudioManager;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     HashMap<Button,Note> noteMap=new HashMap<>();
 
     Button pressedButton;
+    Handler noteOffHandler;
+    // receive message from tone gen when note has finished its decay
 
     private void addNotes(LinearLayout layout) {
         for (Note n : Note.notes) {
@@ -216,6 +220,15 @@ public class MainActivity extends AppCompatActivity {
 
         setVolumeControlStream(AudioManager.STREAM_MUSIC); // recommended
         // https://developer.android.com/training/managing-audio/volume-playback.html
+
+        noteOffHandler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                noteOFF();
+                return false;
+            }
+        });
+        toneGen.setNoteOffHandler(noteOffHandler);
     }
 
     @Override
@@ -241,9 +254,12 @@ public class MainActivity extends AppCompatActivity {
 
     void noteON(Button b) {
         Note n=noteMap.get(b);
-        toneGen.noteON(baseFreq * n.freq);
         pressedButton=b;
         pressedButton.setBackgroundColor(Color.GRAY);
+        toneGen.noteON(baseFreq * n.freq);
+        // todo - can we wait here for the note to end?
+        // that would probably mess up the UI thread, but we can't
+        // turn the note off from the ToneGen run thread.
     }
 
     void noteOFF() {
