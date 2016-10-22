@@ -1,0 +1,182 @@
+diff --git a/app/src/main/java/net/miles_beyond/tones/MainActivity.java b/app/src/main/java/net/miles_beyond/tones/MainActivity.java
+index 51188c4..3d55c89 100755
+--- a/app/src/main/java/net/miles_beyond/tones/MainActivity.java
++++ b/app/src/main/java/net/miles_beyond/tones/MainActivity.java
+@@ -15,12 +15,13 @@ import android.widget.LinearLayout;
+ import android.widget.Spinner;
+ 
+ import net.miles_beyond.tones.synth.ToneGen;
+-import net.miles_beyond.tones.synth.WaveGen;
++import net.miles_beyond.tones.synth.NoteDisplay;
+ import static net.miles_beyond.tones.Util.keyStrip;
+ 
++
+ import java.util.HashMap;
+ 
+-public class MainActivity extends AppCompatActivity {
++public class MainActivity extends AppCompatActivity implements NoteDisplay {
+ 
+     boolean DB=false;
+ 
+@@ -205,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
+     @Override
+     protected void onCreate(Bundle savedInstanceState) {
+         super.onCreate(savedInstanceState);
++        toneGen.setNoteDisplay(this);
+ 
+         setContentView(R.layout.activity_main);
+         LinearLayout layout = (LinearLayout) findViewById(R.id.keys);
+@@ -248,11 +250,17 @@ public class MainActivity extends AppCompatActivity {
+ 
+     void noteOFF() {
+         toneGen.noteOFF();
++        displayNoteOFF();
++    }
++
++
++    public void displayNoteOFF() {
+         if (pressedButton != null) {
+             Note n = noteMap.get(pressedButton);
+             pressedButton.setBackgroundColor(n.white ? Color.WHITE : Color.BLACK);
+             pressedButton = null;
+         }
++
+     }
+ 
+     void noteREPLAY() {
+diff --git a/app/src/main/java/net/miles_beyond/tones/synth/Env.java b/app/src/main/java/net/miles_beyond/tones/synth/Env.java
+index a661908..29b6dc0 100755
+--- a/app/src/main/java/net/miles_beyond/tones/synth/Env.java
++++ b/app/src/main/java/net/miles_beyond/tones/synth/Env.java
+@@ -143,7 +143,11 @@ class Env {
+ 
+     boolean isComplete() {
+         // in release phase, and having reached zero.
+-        return curStep==release && curLevel == 0;
++        //return curStep==release && curLevel == 0;
++
++        //  will falsely report complete if the envelope falls to zero
++        //  and then rises again, but none of the presets do that.
++        return stepIdx != 0 && curLevel == 0;
+     }
+ 
+     double nextVal() {
+diff --git a/app/src/main/java/net/miles_beyond/tones/synth/NoteDisplay.java b/app/src/main/java/net/miles_beyond/tones/synth/NoteDisplay.java
+index 2e05a65..f5c0548 100755
+--- a/app/src/main/java/net/miles_beyond/tones/synth/NoteDisplay.java
++++ b/app/src/main/java/net/miles_beyond/tones/synth/NoteDisplay.java
+@@ -1,8 +1,5 @@
+ package net.miles_beyond.tones.synth;
+ 
+-/**
+- * Created by shiva on 10/21/2016.
+- */
+-
+ public interface NoteDisplay {
++    void displayNoteOFF();
+ }
+diff --git a/app/src/main/java/net/miles_beyond/tones/synth/ToneGen.java b/app/src/main/java/net/miles_beyond/tones/synth/ToneGen.java
+index 2fe213e..b2dd805 100755
+--- a/app/src/main/java/net/miles_beyond/tones/synth/ToneGen.java
++++ b/app/src/main/java/net/miles_beyond/tones/synth/ToneGen.java
+@@ -15,7 +15,7 @@ public class ToneGen {
+     private boolean playing;
+     private AudioTrack audTrack;
+     private int bufSize;
+-
++    private NoteDisplay noteDisplay;
+ 
+     private WaveGen waveGen = WaveGen.getWaveGen("sine");
+     private EnvGen envGen = new EnvGen("organ");
+@@ -38,6 +38,8 @@ public class ToneGen {
+         return envGen.getEnvKey();
+     }
+ 
++    public void setNoteDisplay(NoteDisplay nd) { noteDisplay=nd; }
++
+     public void resumeAudio() {
+         bufSize = AudioTrack.getMinBufferSize(
+                 sampleRate,
+@@ -87,6 +89,7 @@ public class ToneGen {
+                     if (envGen.isComplete()) {
+                         audTrack.stop();
+                         playing = false;
++                        //noteDisplay.displayNoteOFF();
+                         break;
+                     }
+                     short[] next= waveGen.nextBuf();
+diff --git a/app/src/test/java/net/miles_beyond/tones/EnvGenUnitTest.java b/app/src/test/java/net/miles_beyond/tones/EnvGenUnitTest.java
+index 6def14c..6a0fdeb 100755
+--- a/app/src/test/java/net/miles_beyond/tones/EnvGenUnitTest.java
++++ b/app/src/test/java/net/miles_beyond/tones/EnvGenUnitTest.java
+@@ -1,17 +1,63 @@
+ package net.miles_beyond.tones;
+ 
++import net.miles_beyond.tones.synth.EnvGen;
++
+ import org.junit.Test;
+ 
+-import static org.junit.Assert.*;
++import static org.junit.Assert.assertEquals;
++import static org.junit.Assert.assertTrue;
+ 
+ /**
+- * Example local unit test, which will execute on the development machine (host).
+- *
+- * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
++ *  displays only - doesn't assert
++ *  todo - set up assertions from observed behavior
+  */
+ public class EnvGenUnitTest {
++
++    void show(double level) {  // level is from 0 to 1
++        int stars =(int)( 80 * level );
++        for (int i=0; i<stars; ++i) System.out.print("*");
++        System.out.println("");
++    }
++
++
+     @Test
+-    public void addition_isCorrect() throws Exception {
+-        assertEquals(4, 2 + 2);
++    public void envGenWorks() throws Exception {
++
++        EnvGen eg=new EnvGen("test");
++        for (int i=0; i<10; ++i) show(eg.nextVal());
++        // should be 0 before noteON
++        assertEquals(0, eg.nextVal(), 0);
++
++        eg.noteON();
++        for (int i=0; i<10; ++i) show(eg.nextVal());
++        assertEquals(0.5, eg.nextVal(), 0);
++        eg.noteOFF();
++        for (int i=0; i<30; ++i) show(eg.nextVal());
++        assertEquals(0, eg.nextVal(), 0);
++
++
++        eg=new EnvGen("test1");
++        eg.noteON();
++        for (int i=0; i<10; ++i) show(eg.nextVal());
++        eg.noteOFF();
++        for (int i=0; i<30; ++i) show(eg.nextVal());
++
++        eg=new EnvGen("test1");
++        eg.noteON();
++        for (int i=0; i<10; ++i) show(eg.nextVal());
++        eg.noteOFF();
++        for (int i=0; i<10; ++i) show(eg.nextVal());
++        eg.noteON();
++        for (int i=0; i<30; ++i) show(eg.nextVal());
++        eg.noteOFF();
++        for (int i=0; i<30; ++i) show(eg.nextVal());
++
++
++        eg.noteON();
++        for (int i=0; i<75; ++i) show(eg.nextVal());
++        assertEquals(0.75, eg.nextVal(), 0);
++        eg.noteOFF();
++        for (int i=0; i<30; ++i) show(eg.nextVal());
++        assertEquals(0, eg.nextVal(), 0);
+     }
+ }
+\ No newline at end of file
