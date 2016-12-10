@@ -1,0 +1,7 @@
+#!/bin/bash
+
+DST=../../java-doc
+
+rm -r $DST
+
+javadoc -d $DST -private $( find . -name '*.java' | grep -v androidTest )
