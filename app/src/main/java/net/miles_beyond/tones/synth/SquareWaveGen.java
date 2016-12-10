@@ -1,5 +1,8 @@
 package net.miles_beyond.tones.synth;
 
+/**
+ * Generate a plain square wave, with duty cycle of 0.5
+ */
 class SquareWaveGen extends WaveGen {
 
     private double phase = 0; // range: 0-1

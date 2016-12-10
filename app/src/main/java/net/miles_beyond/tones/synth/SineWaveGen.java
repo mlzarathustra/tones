@@ -1,5 +1,8 @@
 package net.miles_beyond.tones.synth;
 
+/**
+ * Generate a sine wave. Adapted from an example found on the internet.
+ */
 class SineWaveGen extends WaveGen {
 
     static double twoPI=Math.PI*2.0;

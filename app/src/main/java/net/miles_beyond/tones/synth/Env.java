@@ -146,14 +146,14 @@ class Env {
         return curStep == release && curLevel == 0;
     }
 
+
+    // if curLevel has reached zero and it's not the first step
+    //        we can assume we're done even if we're not at the release.
+    //        (e.g. clavier sound)
+    //  We have to signal back to the event thread to un-grey the note.
+    //  We can't set the background color from a different thread.
+    //
     boolean isComplete() {          // ##GREY
-        // todo - if curLevel has reached zero and it's not the first step
-        //        we can assume we're done even if we're not at the release.
-        //        (e.g. clavier sound)
-        //   However, if we return that way, we have to signal back to the event thread
-        //         to un-grey the note. We can't set the background color from a different
-        //         thread.
-        //
         return curLevel == 0 && curStep != steps.get(0);
     }
 

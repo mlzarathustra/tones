@@ -4,6 +4,18 @@ import java.util.HashMap;
 import static net.miles_beyond.tones.Util.keyStrip;
 
 
+/**
+ * <p>
+ * A facade facing the ToneGen class.
+ * </p><p>
+ * It addresses messages regarding setting the envelope type,
+ * as well as note-on's and off's. This class contains an
+ * Env object, that deals with the gritty details of the
+ * state machine.
+ *
+ * @see Env
+ * </p>
+ */
 public class EnvGen {
 
     private static HashMap<String,Env>envs = new HashMap<>();

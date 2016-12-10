@@ -7,7 +7,15 @@ import android.media.AudioTrack;
 import android.media.audiofx.PresetReverb;
 import android.os.Handler;
 import android.os.Message;
+import android.widget.LinearLayout;
 
+
+/**
+ * This class manages the Wave Generator and the Envelope Generator classes,
+ * acting as the facade facing the Android's audio system to encapsulate the
+ * details of the WaveGen and EnvGen classes.
+ *
+ */
 public class ToneGen {
 
     private boolean DB=false;
@@ -74,11 +82,15 @@ public class ToneGen {
     }
 
 
+    /**
+     * Start the playback thread that loops, sending the samples to the
+     * Android's Audio Track.
+     */
     private synchronized void start() {
         playThread = new Thread(){
 
             public void run() {
-                playing = true;
+                playing = true;  // to exit the thread cleanly, we use a flag.
                 setPriority(Thread.MAX_PRIORITY);
 
                 if (DB) System.out.println("buffer size is "+bufSize);
@@ -88,6 +100,9 @@ public class ToneGen {
 
                 audTrack.play();
 
+                //
+                //   The MAIN loop
+                //
                 int loops=0;
                 while (playing) {
                     if (envGen.isComplete()) {
@@ -99,10 +114,19 @@ public class ToneGen {
                         break;
 
                     }
+
+                    //  get the next set of wave samples from waveGen,
+                    //  then multiply each by the next set of envelope
+                    //  values from envGen
+                    //
                     short[] next= waveGen.nextBuf();
                     for (int i=0; i<next.length; ++i) {
                         next[i] *= envGen.nextVal();
                     }
+
+                    //  send the samples to the Android
+                    //  I assume this blocks if needed
+                    //
                     int rs=audTrack.write(next,0,next.length);
                     if (DB && loops<100) {
                         System.out.println("audTrack.write() rs="+rs); loops++;
@@ -112,12 +136,12 @@ public class ToneGen {
 
         };
         playThread.start();
-        // todo - wait for join, then return back to the display thread?
-        //          so it can turn the note off when it's done sounding
-        //          We can't hold up here, because the calling function
-        //          has to do a few things to start playing after this.
     }
 
+    /**
+     * Shut down the audio track for this application,
+     * and tell the playback thread to exit.
+     */
     private synchronized void stop() {
         if (audTrack.getState() == AudioTrack.STATE_INITIALIZED) {
             // prevent click when note is released:
@@ -129,6 +153,11 @@ public class ToneGen {
         }
     }
 
+    /**
+     * This is the method the button's event handler calls
+     * @see net.miles_beyond.tones.MainActivity#addNotes(LinearLayout)
+     * @param freq - the frequency of the pitch to play
+     */
     public void noteON(double freq) {
         waveGen.setFreq(freq);
         if (!playing) start();
@@ -137,6 +166,10 @@ public class ToneGen {
 
     }
 
+    /**
+     * for the button's event handler
+     * @see net.miles_beyond.tones.MainActivity#addNotes(LinearLayout)
+     */
     public void noteOFF() {
         //stop();
         envGen.noteOFF();

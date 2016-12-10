@@ -1,7 +1,17 @@
 package net.miles_beyond.tones.synth;
 
-import java.util.ArrayList;
-
+/**
+ * <p>
+ *   perform additive synthesis by constructing a wave composed of one or more harmonics
+ *   of the base frequency (in sine waves).
+ * </p>
+ * <p>
+ *   The composition of the wave is currently determined by an ASCII key(word)
+ *   which is mapped to a set of values giving the frequency and divisor
+ *
+ * </p>
+ *
+ */
 class CompositeWaveGen extends WaveGen {
 
     static double twoPI=Math.PI*2.0;
@@ -21,9 +31,16 @@ class CompositeWaveGen extends WaveGen {
     @Override
     public void reset() { phase=0; }
 
-    // a crude inefficient (but easy to initialize) hashmap
+    // a crude, inefficient (but easy to initialize) hashmap
     //
+    /** the keys of the "hash-map." The correspondingly indexed
+     *  element of waves is the value.
+     */
     private String[] labels={ "mellow","odd","bell", "organ" };
+    /**
+     * the values, as a set of pairs. The pairs are each:
+     *      frequency multiplier, divisor
+     */
     private double[][] waves= {
             {1,1, 2,2, 3,3},
             {1,1, 2,2, 6,3, 14,3},

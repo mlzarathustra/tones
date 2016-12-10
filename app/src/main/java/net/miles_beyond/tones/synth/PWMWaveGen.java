@@ -1,5 +1,10 @@
 package net.miles_beyond.tones.synth;
 
+/**
+ * Generate Pulse-Modulated Square wave.
+ * Meaning: modulate the duty cycle with a Low-Frequency Oscillator (LFO)
+ * LFO frquency is set by a formula according to the wave frequency.
+ */
 class PWMWaveGen extends WaveGen {
 
     static final double twoPI = 2.0 * Math.PI;

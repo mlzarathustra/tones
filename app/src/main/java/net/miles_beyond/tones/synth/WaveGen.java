@@ -6,6 +6,12 @@ import java.util.HashMap;
 
 import static net.miles_beyond.tones.Util.keyStrip;
 
+/**
+ * The parent abstract class that defines the interface of the wave generators.
+ * All wave generators must extend this class.
+ *
+ *
+ */
 public abstract class WaveGen {
     static int DEFAULT_SAMPLE_RATE=44100; // per second
     static double DEFAULT_FREQ=440;       // hz
@@ -23,7 +29,16 @@ public abstract class WaveGen {
 
     void setFreq(double freq) { this.freq = freq; }
 
+    /** The most important override - when called by ToneGen, this method is responsible
+     * for supplying the wave samples required by the Android's Audio Track
+     *
+     * @return - the next block of samples
+     */
     abstract short[] nextBuf();
+
+    /**
+     * reset the note to zero
+     */
     abstract void reset();
 
     //  Manage subclasses (the concrete wave generators)
@@ -38,6 +53,12 @@ public abstract class WaveGen {
         return list;
     }
 
+    /**
+     * Wave Generator "factory" method
+     *
+     * @param key - text mnemonic for wave form
+     * @return a wave generator as named by key
+     */
     static WaveGen getWaveGen(String key) {
         Class wgClass = concreteClasses.get(keyStrip(key));
         try {

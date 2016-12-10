@@ -22,6 +22,13 @@ import static net.miles_beyond.tones.Util.keyStrip;
 
 import java.util.HashMap;
 
+
+/**
+ *
+ *  Activity class for miles' tones app
+ *  currently, there is only one activity.
+ *
+ */
 public class MainActivity extends AppCompatActivity {
 
     boolean DB=false;
@@ -36,6 +43,14 @@ public class MainActivity extends AppCompatActivity {
     Handler noteOffHandler;
     // receive message from tone gen when note has finished its decay
 
+
+    /**
+     * Adds the notes in the map Notes.notes as buttons
+     * in white and black, according to they standard
+     * layout of a piano keyboard.
+     *
+     * @param layout - the container to add the buttons to.
+     */
     private void addNotes(LinearLayout layout) {
         for (Note n : Note.notes) {
 
@@ -71,6 +86,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /** self-explanatory
+     *
+     */
     private void restoreSavedSettings() {
         SharedPreferences p=getPreferences(0);
         hold = p.getBoolean("hold", false);
@@ -80,6 +98,9 @@ public class MainActivity extends AppCompatActivity {
         toneGen.setEnvGen(p.getString("env","fade"));
     }
 
+    /** self-explanatory
+     *
+     */
     private void saveSettings() {
         SharedPreferences p=getPreferences(0);
         SharedPreferences.Editor e=p.edit();
@@ -92,6 +113,12 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("Settings saved.");
     }
 
+    /**
+     * adjust the UI widgets so that they match the current settings
+     * that were loaded from a saved state.
+     *
+     * TODO - 113 lines is rather long... modularlize
+     */
     private void alignUIWithSettings() {
         //  hold
         //
@@ -206,6 +233,11 @@ public class MainActivity extends AppCompatActivity {
          });
     }
 
+    /**
+     * Set up the main UI, restoring saved values
+     *
+     * @param savedInstanceState - unused here
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -245,6 +277,11 @@ public class MainActivity extends AppCompatActivity {
         saveSettings();
     }
 
+    /** debug function
+     *
+     * @param title - title of alert window
+     * @param msg - alert message
+     */
     void alert(String title, String msg) {
         new AlertDialog.Builder(this).setTitle(title).setMessage(msg)
                 .setNeutralButton("close",null).show();
@@ -252,16 +289,24 @@ public class MainActivity extends AppCompatActivity {
         // apparently, it's a common Android bug
     }
 
+    /**
+     * 1. set note display to gray, to indicate the note is playing
+     * 2. tell the tone generator to play the note
+     *
+     * @param b - the button pressed.
+     */
     void noteON(Button b) {
         Note n=noteMap.get(b);
         pressedButton=b;
         pressedButton.setBackgroundColor(Color.GRAY);
         toneGen.noteON(baseFreq * n.freq);
-        // todo - can we wait here for the note to end?
-        // that would probably mess up the UI thread, but we can't
-        // turn the note off from the ToneGen run thread.
     }
 
+    /**
+     * 1. tell the tone generator to stop (it is monophonic, so we don't need to
+     *      tell it which pitch)
+     * 2. set the note display back to the original, to indicate the note is off
+     */
     void noteOFF() {
         toneGen.noteOFF();
         if (pressedButton != null) {
@@ -271,6 +316,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * If something is sounding (pressedButton != null)
+     * execute a Note-OFF followed by Note-ON
+     */
     void noteREPLAY() {
         if (pressedButton != null) {
             Button pb = pressedButton; // noteOFF will set it to null
@@ -279,6 +328,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Set the display to show either the "sharp" version of an enharmonic note
+     * or the "flat" version.  E.g. B-flat and A-sharp.
+     * @param s - if true, sharps. otherwise, flats.
+     */
     private void setSharps(boolean s) {
         sharps = s;
         for (Button b : noteMap.keySet()) {
@@ -286,10 +340,17 @@ public class MainActivity extends AppCompatActivity {
             b.setText(sharps?n.sharpName:n.flatName);
         }
     }
+
+    /** respond to UI action, setting sharps
+     * @param v - the checkbox
+     */
     public void setSharps(View v) {
         setSharps(((CheckBox)v).isChecked());
     }
 
+    /** respond to UI action, setting "hold"
+     * @param v - the checkbox
+     */
     public void setHold(View v) {
         hold=((CheckBox)v).isChecked();
         if (!hold) noteOFF();

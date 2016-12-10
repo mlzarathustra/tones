@@ -1,5 +1,10 @@
 package net.miles_beyond.tones.synth;
 
+/**
+ * A crude, but effective, sawtooth.
+ * It's in fact a ramp wave, with a sharp drop and a slow rise.
+ *
+ */
 class SawWaveGen extends WaveGen {
 
     private double phase = 0; // range: 0-1
