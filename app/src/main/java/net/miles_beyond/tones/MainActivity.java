@@ -1,5 +1,6 @@
 package net.miles_beyond.tones;
 
+import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -15,6 +16,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import net.miles_beyond.tones.synth.ToneGen;
 import net.miles_beyond.tones.synth.WaveGen;

@@ -155,7 +155,7 @@ public class ToneGen {
 
     /**
      * This is the method the button's event handler calls
-     * @see net.miles_beyond.tones.MainActivity#addNotes(LinearLayout)
+     * @see net.miles_beyond.tones.MainActivity, addNotes(LinearLayout)
      * @param freq - the frequency of the pitch to play
      */
     public void noteON(double freq) {
@@ -168,7 +168,7 @@ public class ToneGen {
 
     /**
      * for the button's event handler
-     * @see net.miles_beyond.tones.MainActivity#addNotes(LinearLayout)
+     * @see net.miles_beyond.tones.MainActivity, addNotes(LinearLayout)
      */
     public void noteOFF() {
         //stop();
