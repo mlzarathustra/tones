@@ -21,4 +21,3 @@ list = keys.collect {
    "    new Note(\"$flatName\",\"$sharpName\",$freq, ${it=='+'})"
 
 }.join(',\n')
-
